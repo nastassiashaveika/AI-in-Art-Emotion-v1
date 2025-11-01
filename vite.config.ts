@@ -51,7 +51,10 @@
     },
     build: {
       target: 'esnext',
-      outDir: 'build',
+      outDir: 'dist',
+      chunkSizeWarningLimit: 1000, 
+      sourcemap: false, 
+      minify: 'terser'
     },
     server: {
       port: 3000,
