@@ -52,6 +52,7 @@
         '@': path.resolve(__dirname, './src'),
       },
     },
+    base: '/AI-in-Art-Emotion-v1/',
     build: {
       target: 'esnext',
       outDir: 'build',
