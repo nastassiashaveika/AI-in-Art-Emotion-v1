@@ -78,8 +78,9 @@
     },
     build: {
       target: 'esnext',
-      outDir: 'build',
+      outDir: 'docs',
     },
+    base: '/AI-in-Art-Emotion-v1/',
     server: {
       port: 3000,
       open: true,
