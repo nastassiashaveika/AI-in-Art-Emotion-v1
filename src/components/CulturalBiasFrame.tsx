@@ -2,6 +2,11 @@ import React from 'react';
 import { ResponsiveContainer, PieChart, Pie, Cell, Tooltip, BarChart, Bar, XAxis, YAxis, Legend, CartesianGrid } from 'recharts';
 
 export const CulturalBiasFrame: React.FC = () => {
+  const [showElliotTooltip, setShowElliotTooltip] = React.useState(false);
+  const [showYuTooltip, setShowYuTooltip] = React.useState(false);
+  const [showSumiTooltip, setShowSumiTooltip] = React.useState(false);
+  const [showPastoureauTooltip, setShowPastoureauTooltip] = React.useState(false);
+  
   // Dataset split
   const datasetSplitData = [
     { name: 'Eastern Art', value: 3132, percentage: 2.4, color: '#5D866C' },
@@ -25,7 +30,7 @@ export const CulturalBiasFrame: React.FC = () => {
 
   // Updated Eastern styles data
   const easternStylesData = [
-    { style: 'China_images', Calm: 89.4, Excited: 0.2, Sad: 0 },
+    { style: 'Chinese ink paintings', Calm: 89.4, Excited: 0.2, Sad: 0 },
     { style: 'Gongbi', Calm: 87.5, Excited: 0, Sad: 0 },
     { style: 'Korea', Calm: 87.4, Excited: 0.4, Sad: 0.4 },
     { style: 'Shin-hanga', Calm: 86.8, Excited: 2.6, Sad: 0.3 },
@@ -59,35 +64,101 @@ export const CulturalBiasFrame: React.FC = () => {
     );
   };
 
+  const barColorMap: Record<string, string> = {
+    'Red': '#C96E58',
+    'Blue': '#5D9BD5',
+    'Black': '#888888',
+  };
+
+  const multicolorLetterColors = ['#C96E58', '#5D866C', '#4A6FA5', '#D4A843', '#8B5E83', '#C96E58', '#5D866C', '#4A6FA5', '#D4A843', '#8B5E83'];
+
+  const renderBarTooltip = ({ active, payload, label }: any) => {
+    if (active && payload && payload.length) {
+      return (
+        <div style={{
+          backgroundColor: 'var(--bg-color)',
+          padding: '0.5rem',
+          border: '1px solid var(--text-color)',
+          borderRadius: '4px',
+        }}>
+          <p style={{ fontWeight: 700, margin: 0 }}>
+            {label === 'Multicolor' ? (
+              <span>
+                {'Multicolor'.split('').map((char, i) => (
+                  <span key={i} style={{ color: multicolorLetterColors[i % multicolorLetterColors.length] }}>{char}</span>
+                ))}
+              </span>
+            ) : (
+              <span style={{ color: barColorMap[label] || 'var(--text-color)' }}>{label}</span>
+            )}
+          </p>
+          {payload.map((entry: any, index: number) => (
+            <p key={index} style={{ color: 'var(--text-color)', margin: 0 }}>
+              {entry.name}: {entry.value}
+            </p>
+          ))}
+        </div>
+      );
+    }
+    return null;
+  };
+
+  const renderMulticolorTick = (props: any) => {
+    const { x, y, payload } = props;
+    if (payload.value === 'Multicolor') {
+      const text = 'Multicolor';
+      const colors = ['#C96E58', '#5D866C', '#4A6FA5', '#D4A843', '#8B5E83', '#C96E58', '#5D866C', '#4A6FA5', '#D4A843', '#8B5E83'];
+      return (
+        <g>
+          {text.split('').map((char, i) => (
+            <text
+              key={i}
+              x={x - ((text.length - 1) * 3.5) + i * 7}
+              y={y + 12}
+              fill={colors[i % colors.length]}
+              textAnchor="middle"
+              fontSize={13}
+              fontWeight={500}
+            >
+              {char}
+            </text>
+          ))}
+        </g>
+      );
+    }
+    return (
+      <text x={x} y={y + 12} fill={barColorMap[payload.value] || '#222222'} textAnchor="middle" fontSize={13} fontWeight={500}>
+        {payload.value}
+      </text>
+    );
+  };
+
   return (
     <section 
       className="pudding-section"
-      data-frame="3"
-      style={{ 
-        backgroundColor: '#F5F5F0',
-        minHeight: '100vh',
-        padding: '0'
-      }}
+      data-frame="cultural-bias"
+      style={{ backgroundColor: 'var(--bg-color)' }}
     >
       <div className="pudding-container">
         <div className="space-y-4">
-          <h2 style={{ color: '#5D866C', fontWeight: 700 }}>
-            Then I Asked: What About Different Artistic Traditions?
-          </h2>
+          <h3 style={{ color: 'var(--text-color)', marginTop: '0.5rem' }}>
+            So If Not Color, What Else?
+          </h3>
           
-          <p style={{ color: '#222222' }}>
+          <p style={{ color: 'var(--text-color)' }}>
             The EmoArt dataset contains art from around the world. But not equally.
           </p>
 
-          <p style={{ color: '#222222' }}>
-            I categorized artworks as "Eastern" or "Western" based on their style labels. Styles originating from or primarily associated with East Asian traditions — Chinese ink painting, Ukiyo-e, Gongbi, Korean art, Shin-hanga, Sōsaku hanga, Indian art, Islamic art — were coded as Eastern. European and American movements — Impressionism, Cubism, Abstract Expressionism, Pop Art — were coded as Western.
+          <p style={{ color: 'var(--text-color)' }}>
+            I categorized artworks as "Eastern" or "Western" based on their style labels. Styles originating from or primarily associated with East Asian traditions — Chinese ink painting, Ukiyo-e, Gongbi, Korean art, Shin-hanga, Sōsaku hanga, Indian art, Islamic art — were coded as Eastern. I use "Eastern" as a dataset category rather than a cultural claim.
           </p>
           
           {/* Pie Chart */}
-          <div style={{ height: '250px', marginTop: '1rem', marginBottom: '1rem' }}>
-            <ResponsiveContainer width="100%" height="100%">
-              <PieChart>
+          <div style={{ height: '250px', marginTop: '1rem', marginBottom: '1rem', minHeight: '250px', minWidth: 0 }}>
+            <ResponsiveContainer width="100%" height={250} minWidth={1}>
+              <PieChart id="dataset-split-pie">
                 <Pie
+                  key="dataset-split-pie-slice"
                   data={datasetSplitData}
                   dataKey="value"
                   nameKey="name"
@@ -98,112 +169,287 @@ export const CulturalBiasFrame: React.FC = () => {
                   isAnimationActive={false}
                 >
                   {datasetSplitData.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={entry.color} />
+                    <Cell key={`dataset-${entry.name}-${index}`} fill={entry.color} />
                   ))}
                 </Pie>
                 <Tooltip 
+                  key="dataset-split-pie-tooltip"
                   formatter={(value: number, name: string) => [`${value.toLocaleString()} artworks`, name]}
                 />
               </PieChart>
             </ResponsiveContainer>
           </div>
           
-          <p style={{ color: '#222222' }}>
-            129,763 European and American artworks. Just 3,132 from East Asian traditions. Maybe color will mean drastically different things across the globe.
-          </p>
-    
+      
           
-          <p style={{ color: '#222222' }}>
-            This immediately raised a question: If GPT-4o learned color-emotion associations primarily from Western art, what happens when it encounters Eastern art—where colors carry completely different cultural meanings?
+          <p style={{ color: 'var(--text-color)' }}>
+            If GPT-4o learned color-emotion associations primarily from Western art, what happens when it encounters Eastern art, where colors often carry different cultural meanings?
           </p>
           
-          <p style={{ color: '#222222' }}>
-            Red in Western art often means passion, danger, excitement. In Chinese art, red means celebration, luck, imperial power.
+          <p style={{ color: 'var(--text-color)' }}>
+            We already established red as a signal of passion in the West.{' '}
+            <span
+              style={{
+                position: 'relative',
+                cursor: 'default',
+                borderBottom: '1px dotted var(--text-color)',
+              }}
+              className="group"
+              onMouseEnter={() => setShowElliotTooltip(true)}
+              onMouseLeave={() => setShowElliotTooltip(false)}
+            >
+              Elliot and Maier's review
+              <span
+                style={{
+                  position: 'absolute',
+                  bottom: '100%',
+                  left: '50%',
+                  transform: 'translateX(-50%)',
+                  backgroundColor: '#222222',
+                  color: '#F5F5F0',
+                  padding: '0.5rem',
+                  borderRadius: '2px',
+                  fontSize: '0.875rem',
+                  whiteSpace: 'normal',
+                  width: '320px',
+                  marginBottom: '0.25rem',
+                  opacity: showElliotTooltip ? 1 : 0,
+                  pointerEvents: 'none',
+                  transition: 'opacity 0.2s',
+                  zIndex: 10,
+                }}
+                className="group-hover:opacity-100"
+              >
+                <a
+                  href="https://deweycolorsystem.com/wp-content/uploads/2020/06/Credentials-Color-Psychology.pdf"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{
+                    color: "#5D866C",
+                    textDecoration: "underline",
+                  }}
+                >
+                  Elliot & Maier, 2014
+                </a>
+                {' '}— Color-emotion associations stem from both biological predispositions and repeated cultural pairing. Red is linked to arousal, passion, and danger across Western experimental literature.
+              </span>
+            </span>
+            {' '}traces this to both biological arousal responses and centuries of learned cultural pairing. But in Chinese culture, red carries the opposite emotional register: it represents celebration, good fortune, and imperial power. It's the{' '}
+            <span
+              style={{
+                position: 'relative',
+                cursor: 'default',
+                borderBottom: '1px dotted var(--text-color)',
+              }}
+              className="group"
+              onMouseEnter={() => setShowYuTooltip(true)}
+              onMouseLeave={() => setShowYuTooltip(false)}
+            >
+              color
+              <span
+                style={{
+                  position: 'absolute',
+                  bottom: '100%',
+                  left: '50%',
+                  transform: 'translateX(-50%)',
+                  backgroundColor: '#222222',
+                  color: '#F5F5F0',
+                  padding: '0.5rem',
+                  borderRadius: '2px',
+                  fontSize: '0.875rem',
+                  whiteSpace: 'normal',
+                  width: '320px',
+                  marginBottom: '0.25rem',
+                  opacity: showYuTooltip ? 1 : 0,
+                  pointerEvents: 'none',
+                  transition: 'opacity 0.2s',
+                  zIndex: 10,
+                }}
+                className="group-hover:opacity-100"
+              >
+                <a
+                  href="http://cgjhsc.cgu.edu.tw/data_files/CGJ7-1-03.pdf"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{
+                    color: "#5D866C",
+                    textDecoration: "underline",
+                  }}
+                >
+                  Yu, 2014
+                </a>
+                {' '}— Cross-cultural analysis of color symbolism showing how the same color carries different meanings across civilizations. Documents red's association with life, celebration, and imperial power in Chinese culture through the Five Elements system.
+              </span>
+            </span>
+            {' '}of weddings and Lunar New Year, and is strictly forbidden at funerals.
           </p>
           
-          <p style={{ color: '#222222' }}>
-            Black in Western contexts suggests mourning, mystery, negativity. In Japanese calligraphy, black carries strength, presence, mastery.
+          <p style={{ color: 'var(--text-color)' }}>
+            Black follows the same pattern. In Western contexts, it suggests mourning, mystery, negativity. In Japanese calligraphy and ink painting, black carries mastery, spiritual discipline, and essential presence. The entire tradition of{' '}
+            <span
+              style={{
+                position: 'relative',
+                cursor: 'default',
+                borderBottom: '1px dotted var(--text-color)',
+              }}
+              className="group"
+              onMouseEnter={() => setShowSumiTooltip(true)}
+              onMouseLeave={() => setShowSumiTooltip(false)}
+            >
+              sumi-e
+              <span
+                style={{
+                  position: 'absolute',
+                  bottom: '100%',
+                  left: '50%',
+                  transform: 'translateX(-50%)',
+                  backgroundColor: '#222222',
+                  color: '#F5F5F0',
+                  padding: '0.5rem',
+                  borderRadius: '2px',
+                  fontSize: '0.875rem',
+                  whiteSpace: 'normal',
+                  width: '320px',
+                  marginBottom: '0.25rem',
+                  opacity: showSumiTooltip ? 1 : 0,
+                  pointerEvents: 'none',
+                  transition: 'opacity 0.2s',
+                  zIndex: 10,
+                }}
+                className="group-hover:opacity-100"
+              >
+                Sumi-e (ink wash painting) and Shodo (calligraphy) traditions use only black sumi ink to convey the full range of emotion, season, and atmosphere. The practice is rooted in Zen Buddhism, emphasizing spontaneity and the expression of essence over literal representation.
+              </span>
+            </span>
+            {' '}builds worlds of emotional depth from black ink alone.
+          </p>
+
+          <p style={{ color: 'var(--text-color)' }}>
+            As{' '}
+            <span
+              style={{
+                position: 'relative',
+                cursor: 'default',
+                borderBottom: '1px dotted var(--text-color)',
+              }}
+              className="group"
+              onMouseEnter={() => setShowPastoureauTooltip(true)}
+              onMouseLeave={() => setShowPastoureauTooltip(false)}
+            >
+              Pastoureau
+              <span
+                style={{
+                  position: 'absolute',
+                  bottom: '100%',
+                  left: '50%',
+                  transform: 'translateX(-50%)',
+                  backgroundColor: '#222222',
+                  color: '#F5F5F0',
+                  padding: '0.5rem',
+                  borderRadius: '2px',
+                  fontSize: '0.875rem',
+                  whiteSpace: 'normal',
+                  width: '320px',
+                  marginBottom: '0.25rem',
+                  opacity: showPastoureauTooltip ? 1 : 0,
+                  pointerEvents: 'none',
+                  transition: 'opacity 0.2s',
+                  zIndex: 10,
+                }}
+                className="group-hover:opacity-100"
+              >
+                <a
+                  href="https://press.princeton.edu/books/paperback/9780691181363/blue"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{
+                    color: "#5D866C",
+                    textDecoration: "underline",
+                  }}
+                >
+                  Pastoureau, 2001
+                </a>
+                {' '}— <em>Blue: The History of a Color</em>. Historian of color who argues that color meanings are socially constructed, not inherent. Each culture defines, codes, and assigns value to colors through its own history and traditions.
+              </span>
+            </span>
+            {' '}puts it, color is a social phenomenon: society makes a color, defines it, and gives it meaning. If GPT-4o learned its color-emotion associations from Western training data, it would read a red Chinese painting as "excited" and black Japanese brushwork as "sad," fully missing the cultural scripts.
           </p>
           
-          <p style={{ color: '#222222' }}>
-            If GPT-4o learned Western associations, it would apply Western interpretations to non-Western art.
-          </p>
-          
-          <p style={{ color: '#222222' }}>
-            <strong>Eastern Art: 14 Associations. Western Art: 98.</strong>
-          </p>
-          
-          <p style={{ color: '#222222' }}>
+          <p style={{ color: 'var(--text-color)' }}>
             I ran the same color-emotion tests separately for Eastern and Western artworks.
           </p>
           
-          <p style={{ color: '#222222' }}>
-            The disparity was stark:
-          </p>
+          
           
           {/* Comparison Metrics Table */}
           <div className="overflow-x-auto" style={{ marginTop: '1rem', marginBottom: '1rem' }}>
             <table className="w-full" style={{ borderCollapse: 'collapse' }}>
               <thead>
-                <tr style={{ backgroundColor: '#F5F5F0', borderBottom: '2px solid #222222' }}>
-                  <th className="px-6 py-3 text-left" style={{ color: '#222222' }}>Metric</th>
-                  <th className="px-6 py-3 text-left" style={{ color: '#222222' }}>Eastern</th>
-                  <th className="px-6 py-3 text-left" style={{ color: '#222222' }}>Western</th>
+                <tr style={{ backgroundColor: 'var(--bg-color)', borderBottom: '2px solid var(--text-color)' }}>
+                  <th className="px-6 py-3 text-left" style={{ color: 'var(--text-color)' }}>Metric</th>
+                  <th className="px-6 py-3 text-left" style={{ color: 'var(--text-color)' }}>Eastern</th>
+                  <th className="px-6 py-3 text-left" style={{ color: 'var(--text-color)' }}>Western</th>
                 </tr>
               </thead>
               <tbody>
                 {comparisonMetrics.map((row, index) => (
-                  <tr key={index} style={{ backgroundColor: index % 2 === 0 ? '#F8F8F8' : 'white' }}>
-                    <td className="px-6 py-4" style={{ color: '#222222' }}>{row.metric}</td>
-                    <td className="px-6 py-4" style={{ color: '#C96E58', fontWeight: 700 }}>{row.Eastern}</td>
-                    <td className="px-6 py-4" style={{ color: '#C96E58', fontWeight: 700 }}>{row.Western}</td>
+                  <tr key={index} style={{ backgroundColor: index % 2 === 0 ? 'var(--surface-alt)' : 'var(--panel-bg)' }}>
+                    <td className="px-6 py-4" style={{ color: 'var(--text-color)' }}>{row.metric}</td>
+                    <td className="px-6 py-4" style={{ color: 'var(--highlight-color)', fontWeight: 700 }}>{row.Eastern}</td>
+                    <td className="px-6 py-4" style={{ color: 'var(--highlight-color)', fontWeight: 700 }}>{row.Western}</td>
                   </tr>
                 ))}
               </tbody>
             </table>
           </div>
           
-          <p style={{ color: '#222222' }}>
+          <p style={{ color: 'var(--text-color)' }}>
             The model had learned 7 times more color-emotion patterns from Western traditions.
           </p>
           
           {/* Color Comparison Bar Chart */}
-          <div style={{ height: '350px', marginTop: '1rem', marginBottom: '1rem' }}>
-            <ResponsiveContainer width="100%" height="100%">
+          <div style={{ height: '350px', marginTop: '1rem', marginBottom: '1rem', minWidth: 0 }}>
+            <ResponsiveContainer width="100%" height={350} minWidth={1}>
               <BarChart 
+                id="color-comparison-bar"
                 data={colorComparisonData}
                 margin={{ top: 10, right: 16, left: 16, bottom: 16 }}
                 barGap={4}
                 barCategoryGap="15%"
               >
-                <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" />
+                <CartesianGrid key="ccb-grid" strokeDasharray="3 3" stroke="#e0e0e0" />
                 <XAxis 
+                  key="ccb-xaxis"
                   dataKey="color" 
-                  tick={{ fontSize: 13, fill: '#222222', fontWeight: 500 }}
+                  tick={renderMulticolorTick}
                 />
                 <YAxis 
+                  key="ccb-yaxis"
                   tick={{ fontSize: 12, fill: '#222222' }}
                   domain={[0, 11]}
                   ticks={[0, 2, 4, 6, 8, 10]}
                   label={{ value: 'Number of Associations', angle: -90, position: 'insideLeft', style: { fill: '#222222', fontSize: 14 } }}
                 />
-                <Tooltip />
+                <Tooltip key="ccb-tooltip" content={renderBarTooltip} />
                 <Legend 
+                  key="ccb-legend"
                   verticalAlign="top" 
                   align="right"
                   wrapperStyle={{ paddingBottom: '10px' }}
                   iconType="square"
                 />
                 <Bar 
+                  key="ccb-bar-eastern"
                   dataKey="Eastern" 
-                  fill="#A0A0A0" 
+                  fill="#D4A843" 
                   label={renderCustomLabel}
                   radius={[4, 4, 0, 0]}
                   isAnimationActive={false}
                 />
                 <Bar 
+                  key="ccb-bar-western"
                   dataKey="Western" 
-                  fill="#222222" 
+                  fill="#4A5568" 
                   label={renderCustomLabel}
                   radius={[4, 4, 0, 0]}
                   isAnimationActive={false}
@@ -212,122 +458,114 @@ export const CulturalBiasFrame: React.FC = () => {
             </ResponsiveContainer>
           </div>
           
-          <p style={{ color: '#222222' }}>
-            Take red. In Western art, red connected to ten different emotions—the model understood contextual variation. A red sunset could be calm; a red splash could be alarmed.
+          <p style={{ color: 'var(--text-color)' }}>
+            But the sample sizes are vastly unequal, so fewer associations are expected. The model has seen so little Eastern art that it can't even form consistent color associations. 
           </p>
           
-          <p style={{ color: '#222222' }}>
-            In Eastern art, red linked to one emotion: <strong>Excited</strong>. And weakly. (V = 0.049)
-          </p>
           
-          <p style={{ color: '#222222' }}>
-            The model essentially said: "I know how red works in the 129,000 Western pieces I've seen. These 3,000 Eastern pieces with red? Probably the same thing."
-          </p>
           
           {/* Style Breakdown */}
-          <h2 style={{ color: '#5D866C', fontWeight: 700, marginTop: '1rem' }}>
-            I Looked at Specific Styles. That's When It Got Disturbing.
+          <h2 style={{ color: 'var(--accent-color)', fontWeight: 700, marginTop: '1rem' }}>
+            The Specific Styles
           </h2>
           
-          <p style={{ color: '#222222' }}>
-            GPT-4o's emotion labels weren't just skewed—they were flattening entire artistic traditions into a single emotion.
-          </p>
+          
           
           {/* Eastern Styles Table */}
           <div className="overflow-x-auto" style={{ marginTop: '1rem', marginBottom: '1rem' }}>
             <table className="w-full" style={{ borderCollapse: 'collapse' }}>
               <thead>
-                <tr style={{ backgroundColor: '#F5F5F0', borderBottom: '2px solid #222222' }}>
-                  <th className="px-6 py-3 text-left" style={{ color: '#222222' }}>Style</th>
-                  <th className="px-6 py-3 text-left" style={{ color: '#222222' }}>Calm</th>
-                  <th className="px-6 py-3 text-left" style={{ color: '#222222' }}>Excited</th>
-                  <th className="px-6 py-3 text-left" style={{ color: '#222222' }}>Sad</th>
+                <tr style={{ backgroundColor: 'var(--bg-color)', borderBottom: '2px solid var(--text-color)' }}>
+                  <th className="px-6 py-3 text-left" style={{ color: 'var(--text-color)' }}>Style</th>
+                  <th className="px-6 py-3 text-left" style={{ color: 'var(--text-color)' }}>Calm</th>
+                  <th className="px-6 py-3 text-left" style={{ color: 'var(--text-color)' }}>Excited</th>
+                  <th className="px-6 py-3 text-left" style={{ color: 'var(--text-color)' }}>Sad</th>
                 </tr>
               </thead>
               <tbody>
                 {easternStylesData.map((row, index) => (
-                  <tr key={index} style={{ backgroundColor: index % 2 === 0 ? '#F8F8F8' : 'white' }}>
-                    <td className="px-6 py-4" style={{ color: '#222222' }}>{row.style}</td>
-                    <td className="px-6 py-4" style={{ color: '#C96E58', fontWeight: 700 }}>{row.Calm}%</td>
-                    <td className="px-6 py-4" style={{ color: '#222222' }}>{row.Excited}%</td>
-                    <td className="px-6 py-4" style={{ color: '#222222' }}>{row.Sad}%</td>
+                  <tr key={index} style={{ backgroundColor: index % 2 === 0 ? 'var(--surface-alt)' : 'var(--panel-bg)' }}>
+                    <td className="px-6 py-4" style={{ color: 'var(--text-color)' }}>{row.style}</td>
+                    <td className="px-6 py-4" style={{ color: 'var(--highlight-color)', fontWeight: 700 }}>{row.Calm}%</td>
+                    <td className="px-6 py-4" style={{ color: 'var(--text-color)' }}>{row.Excited}%</td>
+                    <td className="px-6 py-4" style={{ color: 'var(--text-color)' }}>{row.Sad}%</td>
                   </tr>
                 ))}
               </tbody>
             </table>
           </div>
           
-          <p style={{ color: '#222222' }}>
-            Chinese ink paintings—a tradition spanning dynasties, depicting everything from serene landscapes to dynamic battles to political satire—got labeled "calm" 82-89% of the time.
+          <p style={{ color: 'var(--text-color)' }}>
+            Chinese ink paintings—a tradition that covers serene landscapes, battle scenes, and political satire—got labeled "calm" 89.4% of the time.
           </p>
           
-          <p style={{ color: '#222222' }}>
-            Meanwhile, Western abstract movements showed completely different patterns:
+          <p style={{ color: 'var(--text-color)' }}>
+            Meanwhile, Western abstract movements showed different patterns:
           </p>
           
           {/* Western Styles Table */}
           <div className="overflow-x-auto" style={{ marginTop: '1rem', marginBottom: '1rem' }}>
             <table className="w-full" style={{ borderCollapse: 'collapse' }}>
               <thead>
-                <tr style={{ backgroundColor: '#F5F5F0', borderBottom: '2px solid #222222' }}>
-                  <th className="px-6 py-3 text-left" style={{ color: '#222222' }}>Style</th>
-                  <th className="px-6 py-3 text-left" style={{ color: '#222222' }}>Calm</th>
-                  <th className="px-6 py-3 text-left" style={{ color: '#222222' }}>Excited</th>
+                <tr style={{ backgroundColor: 'var(--bg-color)', borderBottom: '2px solid var(--text-color)' }}>
+                  <th className="px-6 py-3 text-left" style={{ color: 'var(--text-color)' }}>Style</th>
+                  <th className="px-6 py-3 text-left" style={{ color: 'var(--text-color)' }}>Calm</th>
+                  <th className="px-6 py-3 text-left" style={{ color: 'var(--text-color)' }}>Excited</th>
                 </tr>
               </thead>
               <tbody>
                 {westernStylesData.map((row, index) => (
-                  <tr key={index} style={{ backgroundColor: index % 2 === 0 ? '#F8F8F8' : 'white' }}>
-                    <td className="px-6 py-4" style={{ color: '#222222' }}>{row.style}</td>
-                    <td className="px-6 py-4" style={{ color: '#222222' }}>{row.Calm}%</td>
-                    <td className="px-6 py-4" style={{ color: '#C96E58', fontWeight: 700 }}>{row.Excited}%</td>
+                  <tr key={index} style={{ backgroundColor: index % 2 === 0 ? 'var(--surface-alt)' : 'var(--panel-bg)' }}>
+                    <td className="px-6 py-4" style={{ color: 'var(--text-color)' }}>{row.style}</td>
+                    <td className="px-6 py-4" style={{ color: 'var(--text-color)' }}>{row.Calm}%</td>
+                    <td className="px-6 py-4" style={{ color: 'var(--highlight-color)', fontWeight: 700 }}>{row.Excited}%</td>
                   </tr>
                 ))}
               </tbody>
             </table>
           </div>
           
-          <p style={{ color: '#222222' }}>
-            Western abstraction got emotional diversity. Eastern tradition got "calm."
-          </p>
+          
           
           {/* Entropy */}
-          <h2 style={{ color: '#5D866C', fontWeight: 700, marginTop: '1rem' }}>
+          <h2 style={{ color: 'var(--accent-color)', fontWeight: 700, marginTop: '1rem' }}>
             I Calculated Entropy. The Numbers Confirmed the Pattern.
           </h2>
           
-          <p style={{ color: '#222222' }}>
+          <p style={{ color: 'var(--text-color)' }}>
             Entropy measures diversity—how spread out the emotion labels are across categories. Higher entropy means more variety; lower means everything clusters into one or two labels.
           </p>
           
-          <p style={{ color: '#222222' }}>
+          <p style={{ color: 'var(--text-color)' }}>
+            If the model were actually reading emotional nuance in art, we'd expect entropy values somewhere around 1.5-2.0 based on what we see in Western styles like Social Realism and Surrealism.
+          </p>
+          
+          <p style={{ color: 'var(--text-color)' }}>
             <strong>Highest entropy (most diverse):</strong>
           </p>
           
-          <ul style={{ color: '#222222', listStyleType: 'disc', paddingLeft: '2rem' }}>
+          <ul style={{ color: 'var(--text-color)', listStyleType: 'disc', paddingLeft: '2rem' }}>
             <li>Social Realism: 1.89</li>
             <li>Surrealism: 1.73</li>
             <li>Expressionism: 1.68</li>
           </ul>
           
-          <p style={{ color: '#222222', marginTop: '0.5rem' }}>
+          <p style={{ color: 'var(--text-color)', marginTop: '0.5rem' }}>
             <strong>Lowest entropy (most flattened):</strong>
           </p>
           
-          <ul style={{ color: '#222222', listStyleType: 'disc', paddingLeft: '2rem' }}>
+          <ul style={{ color: 'var(--text-color)', listStyleType: 'disc', paddingLeft: '2rem' }}>
             <li> Chinese art: 0.35</li>
             <li> Gongbi: 0.38</li>
             <li> Korea: 0.41</li>
             <li> Shin-hanga: 0.57</li>
           </ul>
           
-          <p style={{ color: '#222222', marginTop: '0.5rem' }}>
-            Western movements showed 3-5x more emotional diversity than Eastern traditions.
+          <p style={{ color: 'var(--text-color)', marginTop: '0.5rem' }}>
+            An entropy of 0.35 for Chinese art means the model is essentially outputting a constant—almost always "calm."
           </p>
           
-          <p style={{ color: '#222222' }}>
-            This isn't a model recognizing nuance. It's a model that learned: "When you see this style, label it calm."
-          </p>
+          
         </div>
       </div>
     </section>

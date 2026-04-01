@@ -1,10 +1,11 @@
 
   import { defineConfig } from 'vite';
-  import react from '@vitejs/plugin-react-swc';
+  import react from '@vitejs/plugin-react';
+  import tailwindcss from '@tailwindcss/vite';
   import path from 'path';
 
   export default defineConfig({
-    plugins: [react()],
+    plugins: [react(), tailwindcss()],
     resolve: {
       extensions: ['.js', '.jsx', '.ts', '.tsx', '.json'],
       alias: {
@@ -17,9 +18,32 @@
         'next-themes@0.4.6': 'next-themes',
         'lucide-react@0.487.0': 'lucide-react',
         'input-otp@1.4.2': 'input-otp',
+        'figma:asset/fc9b8640044ead336eade8218c55751e83ad2dbc.png': path.resolve(__dirname, './src/assets/fc9b8640044ead336eade8218c55751e83ad2dbc.png'),
+        'figma:asset/fbea5085849a1ca3387d2f4bce250bccd306c48b.png': path.resolve(__dirname, './src/assets/fbea5085849a1ca3387d2f4bce250bccd306c48b.png'),
+        'figma:asset/edcaf27a2bafb2feadaf2252b3a812a2f23a8b68.png': path.resolve(__dirname, './src/assets/edcaf27a2bafb2feadaf2252b3a812a2f23a8b68.png'),
+        'figma:asset/ec153f0b7dbc541bf4d5e486089a62367a96c202.png': path.resolve(__dirname, './src/assets/ec153f0b7dbc541bf4d5e486089a62367a96c202.png'),
+        'figma:asset/eb500bd10e58b44d4b3def2f0d9faa94aff00fd3.png': path.resolve(__dirname, './src/assets/eb500bd10e58b44d4b3def2f0d9faa94aff00fd3.png'),
+        'figma:asset/e05c254c76ea74cf10e1ff7c6363c756384de776.png': path.resolve(__dirname, './src/assets/e05c254c76ea74cf10e1ff7c6363c756384de776.png'),
+        'figma:asset/d96c8e470670b38772ef6f2977cafb9ca412df75.png': path.resolve(__dirname, './src/assets/d96c8e470670b38772ef6f2977cafb9ca412df75.png'),
+        'figma:asset/b7515af5f6ac3e3ab57720e43e985afacb0da14f.png': path.resolve(__dirname, './src/assets/b7515af5f6ac3e3ab57720e43e985afacb0da14f.png'),
+        'figma:asset/b5580726a5f8d26b7ba5cdc62eab209feb0e511d.png': path.resolve(__dirname, './src/assets/b5580726a5f8d26b7ba5cdc62eab209feb0e511d.png'),
         'figma:asset/af5cd08612d27538a423bbedd0236fd349e8041f.png': path.resolve(__dirname, './src/assets/af5cd08612d27538a423bbedd0236fd349e8041f.png'),
+        'figma:asset/87e601050d115526739a79deb1e1094a64b59840.png': path.resolve(__dirname, './src/assets/87e601050d115526739a79deb1e1094a64b59840.png'),
+        'figma:asset/83ab3c6b0efffc7a036d68eee1e690465629149b.png': path.resolve(__dirname, './src/assets/83ab3c6b0efffc7a036d68eee1e690465629149b.png'),
         'figma:asset/6f693cd2097b2ae458aa416c10c57b36013984f6.png': path.resolve(__dirname, './src/assets/6f693cd2097b2ae458aa416c10c57b36013984f6.png'),
-        'figma:asset/142f30ebc4a9c416dad1c6a9d67befadab20a450.png': path.resolve(__dirname, './src/assets/142f30ebc4a9c416dad1c6a9d67befadab20a450.png'),
+        'figma:asset/6e8fbe69d03d47b4dd829c547cf967c080eae803.png': path.resolve(__dirname, './src/assets/6e8fbe69d03d47b4dd829c547cf967c080eae803.png'),
+        'figma:asset/514678c46843c3ef0dc298e89fb8ef0d3362494c.png': path.resolve(__dirname, './src/assets/514678c46843c3ef0dc298e89fb8ef0d3362494c.png'),
+        'figma:asset/3799922c655cdeb0f96f8e196935dc3a484aa1a3.png': path.resolve(__dirname, './src/assets/3799922c655cdeb0f96f8e196935dc3a484aa1a3.png'),
+        'figma:asset/2c33389a8a30bfdab8670126f693a17f875953ea.png': path.resolve(__dirname, './src/assets/2c33389a8a30bfdab8670126f693a17f875953ea.png'),
+        'figma:asset/2774b956dceee1e7e2bd18df5ce9912237304457.png': path.resolve(__dirname, './src/assets/2774b956dceee1e7e2bd18df5ce9912237304457.png'),
+        'figma:asset/24565949cf7d4052c45a486125b08f279576454d.png': path.resolve(__dirname, './src/assets/24565949cf7d4052c45a486125b08f279576454d.png'),
+        'figma:asset/24178314380f5bc8f4f13aa856234a3b2bfae3fb.png': path.resolve(__dirname, './src/assets/24178314380f5bc8f4f13aa856234a3b2bfae3fb.png'),
+        'figma:asset/236b989289e37fc4b85e90238c81a1cb5799e98d.png': path.resolve(__dirname, './src/assets/236b989289e37fc4b85e90238c81a1cb5799e98d.png'),
+        'figma:asset/224e774911d05c6b40ac0dc4cf135ee822ca7edf.png': path.resolve(__dirname, './src/assets/224e774911d05c6b40ac0dc4cf135ee822ca7edf.png'),
+        'figma:asset/119aee791d8b244bf1056f7ca1885275e2508798.png': path.resolve(__dirname, './src/assets/119aee791d8b244bf1056f7ca1885275e2508798.png'),
+        'figma:asset/1019d445bf93808d50c903c92f8459ca2d583557.png': path.resolve(__dirname, './src/assets/1019d445bf93808d50c903c92f8459ca2d583557.png'),
+        'figma:asset/0b5354162bea13f2c0e62abb93cbee475a17424c.png': path.resolve(__dirname, './src/assets/0b5354162bea13f2c0e62abb93cbee475a17424c.png'),
+        'figma:asset/0752b2a1e089a895570a977af4a2b220e5581cdf.png': path.resolve(__dirname, './src/assets/0752b2a1e089a895570a977af4a2b220e5581cdf.png'),
         'embla-carousel-react@8.6.0': 'embla-carousel-react',
         'cmdk@1.1.1': 'cmdk',
         'class-variance-authority@0.7.1': 'class-variance-authority',
@@ -52,7 +76,6 @@
         '@': path.resolve(__dirname, './src'),
       },
     },
-    base: '/AI-in-Art-Emotion-v1/',
     build: {
       target: 'esnext',
       outDir: 'build',

@@ -1,5 +1,5 @@
 import React from 'react';
-import { ScatterChart, Scatter, XAxis, YAxis, ResponsiveContainer, Tooltip, Cell, ReferenceLine } from 'recharts';
+import { ScatterChart, Scatter, XAxis, YAxis, ResponsiveContainer, Tooltip, ReferenceLine } from 'recharts';
 
 // Most frequent color terms for table
 const colorTermsData = [
@@ -62,6 +62,7 @@ const colorAggregateData = Object.entries(
     return acc;
   }, {} as Record<string, { color: string; emotions: string[]; cramersVs: number[] }>)
 ).map(([color, data]) => ({
+  name: color,
   color,
   emotionsLinked: data.emotions.length,
   avgCramersV: data.cramersVs.reduce((sum, v) => sum + v, 0) / data.cramersVs.length,
@@ -82,170 +83,329 @@ const colorMap: Record<string, string> = {
   'White': '#E8E8E8'
 };
 
-export const ColorEmotionFrame: React.FC = () => {
-  const [selectedColor, setSelectedColor] = React.useState<string | null>(null);
+const multicolorGradientColors = ['#C96E58', '#5D866C', '#4A6FA5', '#D4A843', '#8B5E83', '#C96E58', '#5D866C', '#4A6FA5', '#D4A843', '#8B5E83'];
 
+const MulticolorText = ({ style = {} }: { style?: React.CSSProperties }) => (
+  <span style={{ ...style }}>
+    {'Multicolor'.split('').map((char, i) => (
+      <span key={i} style={{ color: multicolorGradientColors[i % multicolorGradientColors.length] }}>{char}</span>
+    ))}
+  </span>
+);
+
+const ColorName = ({ color, style = {} }: { color: string; style?: React.CSSProperties }) => {
+  if (color === 'Multicolor') return <MulticolorText style={style} />;
+  return <span style={{ color: colorMap[color] || 'var(--text-color)', ...style }}>{color}</span>;
+};
+
+const renderCustomDot = (props: any) => {
+  const { cx, cy, payload, index } = props;
+  if (payload.color === 'Multicolor') {
+    const segments = multicolorGradientColors.slice(0, 5);
+    const angleStep = 360 / segments.length;
+    const clipPathId = `multicolor-clip-${index}-${cx}-${cy}`;
+    return (
+      <g>
+        <defs>
+          <clipPath id={clipPathId}>
+            <circle cx={cx} cy={cy} r={8} />
+          </clipPath>
+        </defs>
+        {segments.map((segColor, i) => {
+          const startAngle = (i * angleStep - 90) * (Math.PI / 180);
+          const endAngle = ((i + 1) * angleStep - 90) * (Math.PI / 180);
+          const x1 = cx + 12 * Math.cos(startAngle);
+          const y1 = cy + 12 * Math.sin(startAngle);
+          const x2 = cx + 12 * Math.cos(endAngle);
+          const y2 = cy + 12 * Math.sin(endAngle);
+          return (
+            <path
+              key={`multicolor-segment-${segColor}-${i}-${index}`}
+              d={`M${cx},${cy} L${x1},${y1} A12,12 0 0,1 ${x2},${y2} Z`}
+              fill={segColor}
+              stroke="var(--text-color)"
+              strokeWidth={0.5}
+              clipPath={`url(#${clipPathId})`}
+            />
+          );
+        })}
+        <circle cx={cx} cy={cy} r={8} fill="none" stroke="var(--text-color)" strokeWidth={1} />
+      </g>
+    );
+  }
+  return (
+    <circle
+      cx={cx}
+      cy={cy}
+      r={8}
+      fill={colorMap[payload.color] || 'var(--text-color)'}
+      stroke="var(--text-color)"
+      strokeWidth={1}
+    />
+  );
+};
+
+export const ColorEmotionFrame: React.FC = () => {
+  const [showCramersVTooltip, setShowCramersVTooltip] = React.useState(false);
+  const [showFDRTooltip, setShowFDRTooltip] = React.useState(false);
+  
   return (
     <section 
+      id="section-2"
       className="pudding-section"
-      data-frame="2"
-      style={{ backgroundColor: '#F5F5F0', paddingTop: '1rem' }}
+      data-frame="color-hypothesis"
+      style={{ backgroundColor: 'var(--bg-color)' }}
     >
       <div className="pudding-container">
+        {/* Section header */}
+        <h2 style={{ color: 'var(--accent-color)', marginBottom: '0.5rem' }}>
+          Color and Culture
+        </h2>
+        
         <div className="space-y-4">
-          <h2 style={{ color: '#5D866C', fontWeight: 700 }}>
-            My First Hypothesis: Maybe AI Just Reacts to Color.
-          </h2>
+          <h3 style={{ color: 'var(--text-color)', marginTop: '0.5rem' }}>
+            Hypothesis 1: Maybe AI Just Reacts to Color
+          </h3>
           
-          <p style={{ color: '#222222' }}>
-            I wanted to test if GPT-4o was just detecting visual features and calling them emotions.
+          <p style={{ color: 'var(--text-color)' }}>
+            I wanted to test if GPT-4o was detecting visual elements and calling them emotions.
           </p>
           
-          <p style={{ color: '#222222' }}>
-            Color seemed like the obvious candidate. Western color psychology has strong conventions: red means passion, blue means calm, yellow means happiness.
+          <p style={{ color: 'var(--text-color)' }}>
+            Western color psychology has strong conventions: red means passion, blue means calm, yellow means happiness (
+            <a
+              href="https://deweycolorsystem.com/wp-content/uploads/2020/06/Credentials-Color-Psychology.pdf"
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{ color: 'var(--accent-color)', textDecoration: 'underline' }}
+            >
+              Dewey Color System
+            </a>
+            ).
           </p>
           
-          <p style={{ color: '#222222' }}>
+          <p style={{ color: 'var(--text-color)' }}>
             I built a color lexicon covering 144 terms and searched through all 132,895 artwork descriptions.
           </p>
+
+          <p style={{ color: 'var(--text-color)', fontSize: '0.85rem', fontStyle: 'italic' }}>
+            All data, code, and analysis for this project are available on{' '}
+            <a
+              href="https://github.com/nastassiashaveika/AI-in-Art-Emotion-v1"
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{ color: 'var(--accent-color)', textDecoration: 'underline' }}
+            >
+              GitHub
+            </a>
+            . For questions or feedback, reach me at{' '}
+            <a
+              href="mailto:shaveika@uni.minerva.edu"
+              style={{ color: 'var(--accent-color)', textDecoration: 'underline' }}
+            >
+              shaveika@uni.minerva.edu
+            </a>
+            .
+          </p>
           
-          <p style={{ color: '#222222' }}>
-            <strong style={{ color: '#C96E58' }}>71.9% mentioned color</strong>—95,515 artworks. The most common terms:
+          <p style={{ color: 'var(--text-color)' }}>
+            <strong style={{ color: 'var(--highlight-color)' }}>71.9% mentioned color</strong>—95,515 artworks. The most common terms:
           </p>
           
           {/* Color Terms Table */}
           <div className="overflow-x-auto" style={{ marginTop: '1rem', marginBottom: '1rem' }}>
             <table className="w-full" style={{ borderCollapse: 'collapse' }}>
               <thead>
-                <tr style={{ backgroundColor: '#F5F5F0', borderBottom: '2px solid #222222' }}>
-                  <th className="px-4 py-3 text-left" style={{ color: '#222222' }}>Term</th>
-                  <th className="px-4 py-3 text-left" style={{ color: '#222222' }}>% of Descriptions</th>
-                  <th className="px-4 py-3 text-left" style={{ color: '#222222' }}>Count</th>
+                <tr style={{ backgroundColor: 'var(--bg-color)', borderBottom: '2px solid var(--text-color)' }}>
+                  <th className="px-4 py-3 text-left" style={{ color: 'var(--text-color)' }}>Term</th>
+                  <th className="px-4 py-3 text-left" style={{ color: 'var(--text-color)' }}>% of Descriptions</th>
+                  <th className="px-4 py-3 text-left" style={{ color: 'var(--text-color)' }}>Count</th>
                 </tr>
               </thead>
               <tbody>
                 {colorTermsData.map((row, index) => (
-                  <tr key={index} style={{ backgroundColor: index % 2 === 0 ? '#F8F8F8' : 'white' }}>
-                    <td className="px-4 py-3" style={{ color: '#222222' }}>{row.term}</td>
-                    <td className="px-4 py-3" style={{ color: '#222222' }}>{row.percentage}%</td>
-                    <td className="px-4 py-3" style={{ color: '#222222' }}>{row.count.toLocaleString()}</td>
+                  <tr key={index} style={{ backgroundColor: index % 2 === 0 ? 'var(--surface-alt)' : 'var(--panel-bg)' }}>
+                    <td className="px-4 py-3" style={{ color: 'var(--text-color)', fontWeight: 700 }}>{row.term}</td>
+                    <td className="px-4 py-3" style={{ color: 'var(--text-color)' }}>{row.percentage}%</td>
+                    <td className="px-4 py-3" style={{ color: 'var(--text-color)' }}>{row.count.toLocaleString()}</td>
                   </tr>
                 ))}
               </tbody>
             </table>
           </div>
           
-          <p style={{ color: '#222222' }}>
+          <p style={{ color: 'var(--text-color)' }}>
             Color was definitely present in the descriptions. But did it actually predict emotions?
           </p>
           
-          {/* Testing Associations */}
-          <p style={{ color: '#5D866C', fontWeight: 700, marginTop: '1rem' }}>
-            I tested all 144 color-emotion pairs for statistical associations.
+          <p style={{ color: 'var(--text-color)' }}>
+            I tested all 144 color-emotion pairs for statistical association using{' '}
+            <span
+              style={{
+                position: 'relative',
+                cursor: 'default',
+                borderBottom: '1px dotted var(--text-color)',
+              }}
+              className="group"
+              onMouseEnter={() => setShowCramersVTooltip(true)}
+              onMouseLeave={() => setShowCramersVTooltip(false)}
+            >
+              Cramér's V
+              <span
+                style={{
+                  position: 'absolute',
+                  bottom: '100%',
+                  left: '50%',
+                  transform: 'translateX(-50%)',
+                  backgroundColor: '#222222',
+                  color: '#F5F5F0',
+                  padding: '0.5rem',
+                  borderRadius: '2px',
+                  fontSize: '0.875rem',
+                  whiteSpace: 'normal',
+                  width: '300px',
+                  marginBottom: '0.25rem',
+                  opacity: showCramersVTooltip ? 1 : 0,
+                  pointerEvents: 'none',
+                  transition: 'opacity 0.2s',
+                  zIndex: 10,
+                }}
+                className="group-hover:opacity-100"
+              >
+                Cramér's V is derived from the chi-square statistic: it takes the chi-square value, divides by the sample size and the number of categories, and takes the square root. This rescales the result to a 0–1 range so you can compare effect sizes across tests with different sample sizes.
+              </span>
+            </span>
+            , which measures how strongly two categorical variables are linked — 0 means no relationship, 1 means a perfect one. 97 pairs showed significant associations (p &lt; 0.05).
           </p>
           
-  
-          <p style={{ color: '#222222' }}>
-            <strong style={{ color: '#C96E58' }}>97</strong> showed significant relationships.
-          </p>
-          
-          <div style={{ 
-            borderLeft: '4px solid #5D866C', 
-            paddingLeft: '1rem', 
-            marginTop: '1rem', 
-            marginBottom: '1rem',
-            backgroundColor: '#FAFAF8'
-          }}>
-            <p style={{ color: '#222222', margin: '0.5rem 0' }}>
-              Quick stats refresher: <i>Cramér's V measures association strength (0 = no relationship, 1 = perfect relationship), while the p-value tells you whether the pattern could occur by random chance (p &lt; 0.05 is the standard threshold for significance).</i>
-            </p>
-          </div>
-          
-          <p style={{ color: '#222222' }}>
-            But here's the thing: when you run 144 tests, some will appear "significant" just by luck. To account for this, I applied FDR (False Discovery Rate) correction—a statistical method that adjusts p-values to control how many false discoveries you're likely to have in your results.
-          </p>
-          
-          <p style={{ color: '#222222' }}>
-            <strong style={{ color: '#C96E58' }}>93 associations survived.</strong> This was real.
+          <p style={{ color: 'var(--text-color)' }}>
+            But running 144 tests creates a problem: at that volume, some results will look significant purely by chance. After applying{' '}
+            <span
+              style={{
+                position: 'relative',
+                cursor: 'default',
+                borderBottom: '1px dotted var(--text-color)',
+              }}
+              className="group"
+              onMouseEnter={() => setShowFDRTooltip(true)}
+              onMouseLeave={() => setShowFDRTooltip(false)}
+            >
+              FDR correction
+              <span
+                style={{
+                  position: 'absolute',
+                  bottom: '100%',
+                  left: '50%',
+                  transform: 'translateX(-50%)',
+                  backgroundColor: '#222222',
+                  color: '#F5F5F0',
+                  padding: '0.5rem',
+                  borderRadius: '2px',
+                  fontSize: '0.875rem',
+                  whiteSpace: 'normal',
+                  width: '320px',
+                  marginBottom: '0.25rem',
+                  opacity: showFDRTooltip ? 1 : 0,
+                  pointerEvents: 'none',
+                  transition: 'opacity 0.2s',
+                  zIndex: 10,
+                }}
+                className="group-hover:opacity-100"
+              >
+                When you run one statistical test at the 5% (typical p-value check) significance threshold, there's a 5% chance of a false positive — you see a pattern that isn't really there. Run 144 tests, and you'd expect about 7 false positives just by luck. FDR correction accounts for this. It takes all 144 p-values, ranks them from most to least significant, and adjusts each one based on its rank. The strongest results barely change. The borderline ones get penalized. If an association still passes after correction, you can be more confident it's real and is not a side effect of running lots of tests.
+              </span>
+            </span>
+            {' '}to filter out likely false positives, 93 associations held.
           </p>
           
           {/* Top Associations Table */}
           <div className="overflow-x-auto" style={{ marginTop: '1rem', marginBottom: '1rem' }}>
             <table className="w-full" style={{ borderCollapse: 'collapse' }}>
               <thead>
-                <tr style={{ backgroundColor: '#F5F5F0', borderBottom: '2px solid #222222' }}>
-                  <th className="px-6 py-3 text-left" style={{ color: '#222222' }}>Color</th>
-                  <th className="px-6 py-3 text-left" style={{ color: '#222222' }}>Emotion</th>
-                  <th className="px-6 py-3 text-left" style={{ color: '#222222' }}>Cramér's V</th>
-                  <th className="px-6 py-3 text-left" style={{ color: '#222222' }}>Adjusted p</th>
+                <tr style={{ backgroundColor: 'var(--bg-color)', borderBottom: '2px solid var(--text-color)' }}>
+                  <th className="px-6 py-3 text-left" style={{ color: 'var(--text-color)' }}>Color</th>
+                  <th className="px-6 py-3 text-left" style={{ color: 'var(--text-color)' }}>Emotion</th>
+                  <th className="px-6 py-3 text-left" style={{ color: 'var(--text-color)' }}>Cramér's V</th>
                 </tr>
               </thead>
               <tbody>
                 {topAssociations.map((row, index) => (
-                  <tr key={index} style={{ backgroundColor: index % 2 === 0 ? '#F8F8F8' : 'white' }}>
-                    <td className="px-6 py-4" style={{ color: '#222222' }}>{row.color}</td>
-                    <td className="px-6 py-4" style={{ color: '#222222' }}>{row.emotion}</td>
-                    <td className="px-6 py-4" style={{ color: '#C96E58', fontWeight: 700 }}>{row.cramersV.toFixed(3)}</td>
-                    <td className="px-6 py-4" style={{ color: '#222222' }}>{row.adjustedP}</td>
+                  <tr key={index} style={{ backgroundColor: index % 2 === 0 ? 'var(--surface-alt)' : 'var(--panel-bg)' }}>
+                    <td className="px-6 py-4">
+                      <ColorName color={row.color} />
+                    </td>
+                    <td className="px-6 py-4" style={{ color: 'var(--text-color)' }}>{row.emotion}</td>
+                    <td className="px-6 py-4" style={{ color: 'var(--highlight-color)', fontWeight: 700 }}>{row.cramersV.toFixed(3)}</td>
                   </tr>
                 ))}
               </tbody>
             </table>
           </div>
           
-          <p style={{ color: '#222222' }}>
-            The associations were statistically significant but modest in strength. A Cramér's V of 0.21 for Red is real, but it's not deterministic. Color influenced the labels, but it wasn't the whole story.
-          </p>
-          
-          <p style={{ color: '#222222' }}>
-            Something else was driving the "calm" default.
+          <p style={{ color: 'var(--text-color)' }}>
+            The associations were statistically significant but modest in strength. A Cramér's V of 0.21 for Red is real, but it's not deterministic. Color matters slightly.
           </p>
           
           {/* Scatter Plot */}
-          <h2 style={{ color: '#5D866C', fontWeight: 700, marginTop: '1rem' }}>
-            Color-Emotion Associations Visualized
-          </h2>
           
-          <p style={{ color: '#222222' }}>
-            I looked at which colors linked to the most emotions and whether having more associations meant stronger effect sizes (higher Cramér's V).
+          <p style={{ color: 'var(--text-color)' }}>
+            I mapped each color by how many emotions it was linked to and how strong those links were. Most colors clustered in the bottom-left: linked in only one emotion with weak effect sizes. Multicolor was the outlier, linked to only two emotions but with the strongest average association (V = 0.177). Overall, the effect sizes are small by conventional standards (
+            <a
+              href="https://utstat.toronto.edu/~brunner/oldclass/378f16/readings/CohenPower.pdf"
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{
+                color: "var(--accent-color)",
+                textDecoration: "underline",
+              }}
+            >
+              Cohen's
+            </a>
+            {' '}benchmarks put 0.1 as "small" and 0.3 as "medium"). Color matters, but it's not doing the heavy lifting.
           </p>
           
-          <div style={{ marginTop: '1rem', marginBottom: '1rem' }}>
-            <ResponsiveContainer width="100%" height={400}>
+          <div style={{ marginTop: '1rem', marginBottom: '1rem', minWidth: 0 }}>
+            <ResponsiveContainer width="100%" height={400} minWidth={1}>
               <ScatterChart
+                id="color-emotion-scatter-chart"
                 margin={{ top: 20, right: 20, bottom: 60, left: 60 }}
               >
                 <XAxis 
+                  key="scatter-xaxis"
                   type="number" 
                   dataKey="emotionsLinked" 
                   name="Number of Emotions Linked"
                   domain={[0, 6]}
-                  label={{ value: 'Number of Emotions Linked', position: 'bottom', offset: 40, style: { fill: '#222222' } }}
-                  tick={{ fill: '#222222' }}
+                  label={{ value: 'Number of Emotions Linked', position: 'bottom', offset: 40, style: { fill: 'var(--text-color)' } }}
+                  tick={{ fill: 'var(--text-color)' }}
                 />
                 <YAxis 
+                  key="scatter-yaxis"
                   type="number" 
                   dataKey="avgCramersV" 
                   name="Average Cramér's V"
                   domain={[0, 0.15]}
-                  label={{ value: 'Average Cramér\'s V', angle: -90, position: 'insideLeft', style: { fill: '#222222', textAnchor: 'middle' } }}
-                  tick={{ fill: '#222222' }}
+                  label={{ value: 'Average Cramér\'s V', angle: -90, position: 'insideLeft', style: { fill: 'var(--text-color)', textAnchor: 'middle' } }}
+                  tick={{ fill: 'var(--text-color)' }}
                 />
                 <Tooltip 
+                  key="scatter-tooltip"
                   cursor={{ strokeDasharray: '3 3' }}
                   content={({ active, payload }) => {
                     if (active && payload && payload.length) {
                       const data = payload[0].payload;
                       return (
                         <div style={{ 
-                          backgroundColor: 'white', 
+                          backgroundColor: 'var(--bg-color)', 
                           padding: '0.5rem', 
-                          border: '1px solid #222222',
+                          border: '1px solid var(--text-color)',
                           borderRadius: '4px'
                         }}>
-                          <p style={{ color: '#5D866C', fontWeight: 700, margin: 0 }}>{data.color}</p>
-                          <p style={{ color: '#222222', margin: 0 }}>Emotions: {data.emotionsLinked}</p>
-                          <p style={{ color: '#222222', margin: 0 }}>Avg Cramér's V: {data.avgCramersV.toFixed(3)}</p>
+                          <p style={{ fontWeight: 700, margin: 0 }}>
+                            <ColorName color={data.color} style={{ fontWeight: 700 }} />
+                          </p>
+                          <p style={{ color: 'var(--text-color)', margin: 0 }}>Emotions: {data.emotionsLinked}</p>
+                          <p style={{ color: 'var(--text-color)', margin: 0 }}>Avg Cramér's V: {data.avgCramersV.toFixed(3)}</p>
                         </div>
                       );
                     }
@@ -253,53 +413,21 @@ export const ColorEmotionFrame: React.FC = () => {
                   }}
                 />
                 <ReferenceLine 
+                  key="scatter-refline"
                   y={0.105} 
                   stroke="#999" 
                   strokeDasharray="3 3"
                 />
                 <Scatter 
+                  key="scatter-dots"
                   name="Colors" 
                   data={colorAggregateData}
                   isAnimationActive={false}
-                  onClick={(data: any) => setSelectedColor(data.color)}
-                  style={{ cursor: 'pointer' }}
-                >
-                  {colorAggregateData.map((entry, index) => (
-                    <Cell 
-                      key={`cell-${index}`} 
-                      fill={colorMap[entry.color] || '#222222'}
-                      stroke="#222222"
-                      strokeWidth={selectedColor === entry.color ? 2 : 0}
-                    />
-                  ))}
-                </Scatter>
+                  shape={renderCustomDot}
+                />
               </ScatterChart>
             </ResponsiveContainer>
           </div>
-          
-          <p style={{ color: '#808080', fontSize: 12, textAlign: 'center' }}>
-            Click on a dot to see which emotions are linked to that color.
-          </p>
-          
-          {selectedColor && (
-            <div style={{ 
-              marginTop: '1rem', 
-              padding: '1rem', 
-              backgroundColor: 'white',
-              border: '1px solid #222222',
-              borderRadius: '4px'
-            }}>
-              <h3 style={{ color: '#5D866C', fontWeight: 700, margin: '0 0 0.5rem 0' }}>
-                {selectedColor}
-              </h3>
-              <p style={{ color: '#222222', margin: '0 0 0.5rem 0' }}>
-                <strong>Emotions Linked:</strong> {colorAggregateData.find(d => d.color === selectedColor)?.emotions}
-              </p>
-              <p style={{ color: '#222222', margin: 0 }}>
-                <strong>Average Cramér's V:</strong> {colorAggregateData.find(d => d.color === selectedColor)?.avgCramersV.toFixed(3)}
-              </p>
-            </div>
-          )}
         </div>
       </div>
     </section>

@@ -1,45 +1,131 @@
-import React from 'react';
-import { ImageWithFallback } from './figma/ImageWithFallback';
+import React, { useState } from "react";
+import { ImageWithFallback } from "./figma/ImageWithFallback";
 
 export const HeroFrame: React.FC = () => {
+  const [showCapstoneNote, setShowCapstoneNote] = useState(false);
+
   return (
-    <section 
-      className="min-h-screen pt-16"
+    <section
+      id="section-0"
+      className="min-h-screen pt-16 bg-background"
       data-frame="0"
-      style={{ backgroundColor: '#F5F5F0' }}
     >
       <div className="pudding-container">
         {/* Main title */}
         <h1
-          className="text-center mb-12"
-          style={{ 
-            color: '#222222',
+          className="text-center mb-4"
+          style={{
+            color: 'var(--accent-color)',
             fontWeight: 700,
-            letterSpacing: '-0.02em',
+            letterSpacing: "-0.02em",
             lineHeight: 0.95,
-            fontSize: '3.5rem'
+            fontSize: "3.5rem",
           }}
         >
-          AI Sees Calm in Chaos
+          AI, Calm in Chaos, and Orientalism
         </h1>
 
+        {/* Author */}
+        <div className="text-center mb-8">
+          <p
+            className="text-muted-foreground"
+            style={{
+              fontSize: "1rem",
+            }}
+          >
+            Nastassia Shaveika, 2026
+          </p>
+
+          <button
+            onClick={() => setShowCapstoneNote(!showCapstoneNote)}
+            style={{
+              background: "none",
+              border: "none",
+              cursor: "pointer",
+              color: "var(--accent-color)",
+              padding: "2px 8px",
+              fontSize: "1.1rem",
+              display: "inline-flex",
+              alignItems: "center",
+              justifyContent: "center",
+              marginTop: "4px",
+              lineHeight: 1
+            }}
+            aria-label="Toggle capstone info"
+          >
+            {showCapstoneNote ? "−" : "note :)"}
+          </button>
+
+          {showCapstoneNote && (
+            <p
+              className="text-muted-foreground mt-2 mx-auto"
+              style={{
+                fontSize: "0.85rem",
+                fontStyle: "italic",
+                maxWidth: "600px",
+                padding: "0.5rem",
+                backgroundColor: "var(--surface-alt)",
+                borderRadius: "4px"
+              }}
+            >
+              Hey! This is a capstone project for Minerva University, developed from mid-2025 through early 2026. The cross-model experiment was conducted using models available at the time.
+            </p>
+          )}
+        </div>
+
         {/* Painting */}
-        <div style={{ margin: '1rem 0' }}>
+        <div style={{ margin: "1.5rem 0" }}>
           <ImageWithFallback
             src="https://upload.wikimedia.org/wikipedia/commons/thumb/a/a3/Fra_Filippo_Lippi_-_The_Funeral_of_St_Stephen_-_WGA13271.jpg/1200px-Fra_Filippo_Lippi_-_The_Funeral_of_St_Stephen_-_WGA13271.jpg?20110610032711"
             alt="Filippo Lippi - The Funeral of St. Stephen"
-            className="w-full h-auto"
+            style={{ 
+              width: '100%', 
+              height: 'auto',
+              display: 'block'
+            }}
           />
         </div>
 
         {/* Opening narrative */}
-        <div className="space-y-4">
-          <p style={{ color: '#222222' }}>
-            This is "The Funeral of St. Stephen" by Filippo Lippi (1460), an Early Renaissance painting depicting mourners gathering around a dead man. GPT-4o looked at this painting and said: Calm. 
+        <div className="space-y-2">
+          <p className="text-foreground">
+            What do you think about the painting above?
           </p>
 
-          <p style={{ color: '#222222' }}>
-            Not Sad. Not Grieving. Calm. And if you are curious why this matters and why a data science student finds this interesting; please keep reading this story.
+          <p className="text-foreground">
+            It has soft colors, is well-composed, shows a man lying in the center with people gathered around him.
+          </p>
+
+          <p className="text-foreground">
+            This is <a href="https://www.wga.hu/html_m/l/lippi/filippo/1450pr/13funer.html" target="_blank" rel="noopener noreferrer" style={{ color: "var(--accent-color)", textDecoration: "underline" }}>"The Funeral of Saint Stephen" (1460) by Filippo Lippi</a>. The figures are mourning the death of the first Christian martyr. Historically, it's a scene of grief.
+          </p>
+
+          <p className="text-foreground">
+            According to the{" "}
+            <a
+              href="https://huggingface.co/datasets/printblue/EmoArt-130k"
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{
+                color: "var(--accent-color)",
+                textDecoration: "underline",
+              }}
+            >
+              EmoArt dataset
+            </a>{" "}
+            (which I will introduce in the next section), GPT-4o looked at this painting and said: <strong style={{ color: "var(--accent-color)" }}>Calm</strong>.
+          </p>
+
+          <p className="text-foreground">
+            When I tested other models on the same image, they disagreed. GPT-5.1 identified sadness and described the people around as "mourners whose faces and postures show heaviness and grief."
+          </p>
+
+          <p className="text-foreground">
+            This little test is basically what this whole piece is about.
+          </p>
+
+          <p className="text-foreground">
+           I investigate why AI calls very different artworks "calm," and what that reveals about how these systems interpret emotion, culture, and unfamiliar artistic traditions.
           </p>
         </div>
       </div>
