@@ -262,7 +262,7 @@ export const CrossModelFrame: React.FC = () => {
           </h3>
 
           <p style={{ color: 'var(--text-color)' }}>
-            Haiku showed the widest range with 12 unique emotions, while GPT-5.1 showed the narrowest with 8. Most models settled around 9–11 emotions out of the 13 available.
+            Haiku showed the widest range with 12 unique emotions, while GPT-5.1 showed the narrowest with 8. Most models settled around 9–11 emotions out of the 12 available.
           </p>
 
           <EmotionalRangeChart />
@@ -454,7 +454,7 @@ export const CrossModelFrame: React.FC = () => {
           </p>
 
           <p style={{ color: 'var(--text-color)' }}>
-            Chinese ink landscapes were my first crisis. One painting featured mountains emerging from mist, spare brushstrokes, and ample space. Traditional Chinese aesthetics would describe this as <em>qiyun shengdong</em>, meaning "spirit resonance and life motion." But the 13-emotion list does not have this. So, I suppose, if I had to pick, I would also like "calm."
+            Chinese ink landscapes were my first crisis. One painting featured mountains emerging from mist, spare brushstrokes, and ample space. Traditional Chinese aesthetics would describe this as <em>qiyun shengdong</em>, meaning "spirit resonance and life motion." But the 12-emotion list does not have this. So, I suppose, if I had to pick, I would also like "calm."
           </p>
 
           {/* Li Gonglin */}
@@ -534,7 +534,7 @@ const emotionalRangeData = [
 ];
 
 const EmotionalRangeChart: React.FC = () => {
-  const maxEmotions = 13;
+  const maxEmotions = 12;
 
   return (
     <div style={{ margin: '1rem 0 1.5rem' }}>
@@ -623,7 +623,7 @@ const EmotionalRangeChart: React.FC = () => {
         marginTop: '0.25rem',
         fontStyle: 'italic',
       }}>
-        Unique emotion labels used across both prompts (out of 13 available)
+        Unique emotion labels used across both prompts (out of 12 available)
       </p>
     </div>
   );
